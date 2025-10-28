@@ -3,6 +3,23 @@ require '../../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 dol_include_once('/verifactu_eoconsultores/lib/qr.php');
 
+if (!function_exists('verifactu_escape_html')) {
+    /**
+     * Escape HTML values while keeping compatibility with Dolibarr 6.x.
+     *
+     * @param string|null $value
+     * @return string
+     */
+    function verifactu_escape_html($value)
+    {
+        if (function_exists('dol_escape_htmltag')) {
+            return dol_escape_htmltag($value);
+        }
+
+        return htmlspecialchars((string) $value, ENT_COMPAT, 'UTF-8');
+    }
+}
+
 global $conf, $langs, $user, $db;
 
 $langs->loadLangs(array('admin', 'verifactu_eoconsultores@verifactu_eoconsultores'));
@@ -83,7 +100,7 @@ print '<div class="fichecenter">';
 print '<table class="noborder" role="presentation">';
 
 print '<tr><td><label for="nif_emisor" title="NIF del emisor" aria-label="NIF del emisor">NIF Emisor</label></td>';
-print '<td><input type="text" class="flat" id="nif_emisor" name="nif_emisor" placeholder="ES12345678A" title="NIF del emisor" aria-label="NIF del emisor" value="'.dol_escape_htmltag($nifValue).'" required></td></tr>';
+print '<td><input type="text" class="flat" id="nif_emisor" name="nif_emisor" placeholder="ES12345678A" title="NIF del emisor" aria-label="NIF del emisor" value="'.verifactu_escape_html($nifValue).'" required></td></tr>';
 
 print '<tr><td><label for="modalidad" title="Modalidad del sistema" aria-label="Modalidad">Modalidad</label></td>';
 print '<td><select id="modalidad" name="modalidad" title="Selecciona la modalidad" aria-label="Selecciona la modalidad">';
@@ -95,13 +112,13 @@ foreach ($opts as $opt) {
 print '</select></td></tr>';
 
 print '<tr><td><label for="system_id" title="Identificador del sistema" aria-label="Identificador del sistema">Sistema ID</label></td>';
-print '<td><input type="text" class="flat" id="system_id" name="system_id" placeholder="EO-VERIFACTU-001" title="Identificador del sistema" aria-label="Identificador del sistema" value="'.dol_escape_htmltag($systemIdValue).'"></td></tr>';
+print '<td><input type="text" class="flat" id="system_id" name="system_id" placeholder="EO-VERIFACTU-001" title="Identificador del sistema" aria-label="Identificador del sistema" value="'.verifactu_escape_html($systemIdValue).'"></td></tr>';
 
 print '<tr><td><label for="pem_path" title="Ruta del archivo PEM" aria-label="Ruta PEM">Ruta Clave PEM</label></td>';
-print '<td><input type="text" class="flat" id="pem_path" name="pem_path" placeholder="/var/keys/private.pem" title="Ruta del archivo PEM" aria-label="Ruta del archivo PEM" value="'.dol_escape_htmltag($pemPathValue).'"></td></tr>';
+print '<td><input type="text" class="flat" id="pem_path" name="pem_path" placeholder="/var/keys/private.pem" title="Ruta del archivo PEM" aria-label="Ruta del archivo PEM" value="'.verifactu_escape_html($pemPathValue).'"></td></tr>';
 
 print '<tr><td><label for="pem_password" title="Contraseña PEM" aria-label="Contraseña PEM">Password PEM</label></td>';
-print '<td><input type="password" class="flat" id="pem_password" name="pem_password" placeholder="••••" title="Contraseña PEM" aria-label="Contraseña PEM" value="'.dol_escape_htmltag($pemPasswordValue).'"></td></tr>';
+print '<td><input type="password" class="flat" id="pem_password" name="pem_password" placeholder="••••" title="Contraseña PEM" aria-label="Contraseña PEM" value="'.verifactu_escape_html($pemPasswordValue).'"></td></tr>';
 
 print '<tr><td><label for="qr_enabled" title="Activar QR en PDF" aria-label="Activar QR">Activar QR</label></td>';
 print '<td><select id="qr_enabled" name="qr_enabled" title="Activar código QR" aria-label="Activar código QR">';
