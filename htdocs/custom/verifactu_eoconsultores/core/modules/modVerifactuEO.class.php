@@ -60,7 +60,6 @@ class modVerifactuEO extends DolibarrModules
 
         $this->module_parts = array(
             'triggers' => 1,
-            'hooks' => array('pdfgeneration'),
             'models' => 1
         );
 
@@ -71,8 +70,8 @@ class modVerifactuEO extends DolibarrModules
         $this->depends = array();
         $this->requiredby = array();
         $this->conflictwith = array();
-        $this->phpmin = array(7, 4); // PHP 7.4 minimum
-        $this->need_dolibarr_version = array(17, 0);
+        $this->phpmin = array(7, 0); // Compatible with PHP 7.0
+        $this->need_dolibarr_version = array(6, 0);
 
         $this->const = array();
         $this->tabs = array();

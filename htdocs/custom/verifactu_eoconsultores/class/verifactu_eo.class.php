@@ -119,7 +119,7 @@ class VerifactuEO
      * @return array
      * @throws Exception
      */
-    private function createHashRecord(array $data)
+    private function createHashRecord($data)
     {
         $previous = $this->getLastHash();
         $payload = json_encode($data);
@@ -145,7 +145,7 @@ class VerifactuEO
      * @return void
      * @throws Exception
      */
-    private function saveRegister(array $data, array $hashRecord)
+    private function saveRegister($data, $hashRecord)
     {
         global $conf;
 

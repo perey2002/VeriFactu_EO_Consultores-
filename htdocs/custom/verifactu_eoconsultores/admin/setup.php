@@ -1,5 +1,5 @@
 <?php
-require '../main.inc.php';
+require '../../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 dol_include_once('/verifactu_eoconsultores/lib/qr.php');
 
@@ -23,7 +23,10 @@ if ($action === 'save') {
     $systemId = trim(GETPOST('system_id', 'alphanohtml'));
     $pemPath = trim(GETPOST('pem_path', 'restricthtml'));
     $pemPassword = GETPOST('pem_password', 'restricthtml');
-    $qrEnabled = GETPOSTISSET('qr_enabled') ? 1 : 0;
+    $qrEnabled = GETPOST('qr_enabled', 'int');
+    if ($qrEnabled != 1) {
+        $qrEnabled = 0;
+    }
 
     dolibarr_set_const($db, 'VERIFACTU_EO_NIF', $nif, 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, 'VERIFACTU_EO_MODE', $mode, 'chaine', 0, '', $conf->entity);
@@ -44,11 +47,11 @@ if ($action === 'save') {
 
 if ($action === 'testqr') {
     $data = array(
-        'nif' => $conf->global->VERIFACTU_EO_NIF,
+        'nif' => isset($conf->global->VERIFACTU_EO_NIF) ? $conf->global->VERIFACTU_EO_NIF : '',
         'ref' => 'TEST-QR',
         'date' => dol_print_date(dol_now(), 'dayrfc'),
         'total' => '0.00',
-        'mode' => $conf->global->VERIFACTU_EO_MODE
+        'mode' => isset($conf->global->VERIFACTU_EO_MODE) ? $conf->global->VERIFACTU_EO_MODE : 'VERI*FACTU'
     );
     $hash = hash('sha256', microtime(true));
     $url = build_verifactu_qr_url($data, $hash);
@@ -62,7 +65,11 @@ if (!empty($message)) {
 }
 
 $mode = !empty($conf->global->VERIFACTU_EO_MODE) ? $conf->global->VERIFACTU_EO_MODE : 'VERI*FACTU';
-$qrEnabled = !empty($conf->global->VERIFACTU_EO_QR_ENABLED);
+$qrEnabled = !empty($conf->global->VERIFACTU_EO_QR_ENABLED) ? (int) $conf->global->VERIFACTU_EO_QR_ENABLED : 0;
+$nifValue = isset($conf->global->VERIFACTU_EO_NIF) ? $conf->global->VERIFACTU_EO_NIF : '';
+$systemIdValue = isset($conf->global->VERIFACTU_EO_SYSTEM_ID) ? $conf->global->VERIFACTU_EO_SYSTEM_ID : '';
+$pemPathValue = isset($conf->global->VERIFACTU_EO_PEM_PATH) ? $conf->global->VERIFACTU_EO_PEM_PATH : '';
+$pemPasswordValue = isset($conf->global->VERIFACTU_EO_PEM_PASSWORD) ? $conf->global->VERIFACTU_EO_PEM_PASSWORD : '';
 
 llxHeader('', 'VeriFactu EO Consultores');
 
@@ -76,7 +83,7 @@ print '<div class="fichecenter">';
 print '<table class="noborder" role="presentation">';
 
 print '<tr><td><label for="nif_emisor" title="NIF del emisor" aria-label="NIF del emisor">NIF Emisor</label></td>';
-print '<td><input type="text" class="flat" id="nif_emisor" name="nif_emisor" placeholder="ES12345678A" title="NIF del emisor" aria-label="NIF del emisor" value="'.dol_escape_htmltag($conf->global->VERIFACTU_EO_NIF).'" required></td></tr>';
+print '<td><input type="text" class="flat" id="nif_emisor" name="nif_emisor" placeholder="ES12345678A" title="NIF del emisor" aria-label="NIF del emisor" value="'.dol_escape_htmltag($nifValue).'" required></td></tr>';
 
 print '<tr><td><label for="modalidad" title="Modalidad del sistema" aria-label="Modalidad">Modalidad</label></td>';
 print '<td><select id="modalidad" name="modalidad" title="Selecciona la modalidad" aria-label="Selecciona la modalidad">';
@@ -88,17 +95,19 @@ foreach ($opts as $opt) {
 print '</select></td></tr>';
 
 print '<tr><td><label for="system_id" title="Identificador del sistema" aria-label="Identificador del sistema">Sistema ID</label></td>';
-print '<td><input type="text" class="flat" id="system_id" name="system_id" placeholder="EO-VERIFACTU-001" title="Identificador del sistema" aria-label="Identificador del sistema" value="'.dol_escape_htmltag($conf->global->VERIFACTU_EO_SYSTEM_ID).'"></td></tr>';
+print '<td><input type="text" class="flat" id="system_id" name="system_id" placeholder="EO-VERIFACTU-001" title="Identificador del sistema" aria-label="Identificador del sistema" value="'.dol_escape_htmltag($systemIdValue).'"></td></tr>';
 
 print '<tr><td><label for="pem_path" title="Ruta del archivo PEM" aria-label="Ruta PEM">Ruta Clave PEM</label></td>';
-print '<td><input type="text" class="flat" id="pem_path" name="pem_path" placeholder="/var/keys/private.pem" title="Ruta del archivo PEM" aria-label="Ruta del archivo PEM" value="'.dol_escape_htmltag($conf->global->VERIFACTU_EO_PEM_PATH).'"></td></tr>';
+print '<td><input type="text" class="flat" id="pem_path" name="pem_path" placeholder="/var/keys/private.pem" title="Ruta del archivo PEM" aria-label="Ruta del archivo PEM" value="'.dol_escape_htmltag($pemPathValue).'"></td></tr>';
 
 print '<tr><td><label for="pem_password" title="Contraseña PEM" aria-label="Contraseña PEM">Password PEM</label></td>';
-print '<td><input type="password" class="flat" id="pem_password" name="pem_password" placeholder="••••" title="Contraseña PEM" aria-label="Contraseña PEM" value="'.dol_escape_htmltag($conf->global->VERIFACTU_EO_PEM_PASSWORD).'"></td></tr>';
+print '<td><input type="password" class="flat" id="pem_password" name="pem_password" placeholder="••••" title="Contraseña PEM" aria-label="Contraseña PEM" value="'.dol_escape_htmltag($pemPasswordValue).'"></td></tr>';
 
-$checked = $qrEnabled ? ' checked' : '';
 print '<tr><td><label for="qr_enabled" title="Activar QR en PDF" aria-label="Activar QR">Activar QR</label></td>';
-print '<td><input type="checkbox" id="qr_enabled" name="qr_enabled" title="Activar código QR" aria-label="Activar código QR"'.$checked.'></td></tr>';
+print '<td><select id="qr_enabled" name="qr_enabled" title="Activar código QR" aria-label="Activar código QR">';
+print '<option value="1"'.($qrEnabled ? ' selected="selected"' : '').'>Sí</option>';
+print '<option value="0"'.(!$qrEnabled ? ' selected="selected"' : '').'>No</option>';
+print '</select></td></tr>';
 
 print '</table>';
 print '</div>';
