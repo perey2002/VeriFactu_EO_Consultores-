@@ -20,6 +20,64 @@ if (!function_exists('verifactu_escape_html')) {
     }
 }
 
+if (!function_exists('verifactu_get_token')) {
+    /**
+     * Generate a CSRF token compatible with both legacy and modern Dolibarr.
+     *
+     * @return string
+     */
+    function verifactu_get_token()
+    {
+        if (function_exists('newToken')) {
+            return newToken();
+        }
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $seed = session_id().'|'.microtime(true).'|'.mt_rand();
+        if (function_exists('dol_hash')) {
+            $token = dol_hash($seed);
+        } else {
+            $token = hash('sha256', $seed);
+        }
+
+        $_SESSION['newtoken'] = $token;
+
+        return $token;
+    }
+}
+
+if (!function_exists('verifactu_check_token')) {
+    /**
+     * Validate CSRF token in a Dolibarr 6 compatible way.
+     *
+     * @return bool
+     */
+    function verifactu_check_token()
+    {
+        if (function_exists('checkToken')) {
+            return checkToken();
+        }
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $token = GETPOST('token', 'alphanohtml');
+        if (empty($token) || empty($_SESSION['newtoken'])) {
+            return false;
+        }
+
+        if (function_exists('hash_equals')) {
+            return hash_equals($_SESSION['newtoken'], $token);
+        }
+
+        return $_SESSION['newtoken'] === $token;
+    }
+}
+
 global $conf, $langs, $user, $db;
 
 $langs->loadLangs(array('admin', 'verifactu_eoconsultores@verifactu_eoconsultores'));
@@ -33,6 +91,12 @@ $message = '';
 $error = 0;
 
 $backtopage = $_SERVER['PHP_SELF'];
+
+if (in_array($action, array('save', 'testqr'), true) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifactu_check_token()) {
+        accessforbidden();
+    }
+}
 
 if ($action === 'save') {
     $nif = trim(GETPOST('nif_emisor', 'alphanohtml'));
@@ -93,7 +157,7 @@ llxHeader('', 'VeriFactu EO Consultores');
 print load_fiche_titre('VeriFactu EO Consultores');
 
 print '<form method="post" action="'.$backtopage.'" role="form" aria-label="Configuración VeriFactu EO Consultores">';
-print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<input type="hidden" name="token" value="'.verifactu_get_token().'">';
 print '<input type="hidden" name="action" value="save">';
 
 print '<div class="fichecenter">';
@@ -135,7 +199,7 @@ print '</div>';
 print '</form>';
 
 print '<form method="post" action="'.$backtopage.'" role="form" aria-label="Generar QR de prueba">';
-print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<input type="hidden" name="token" value="'.verifactu_get_token().'">';
 print '<input type="hidden" name="action" value="testqr">';
 print '<div class="center">';
 print '<button type="submit" class="button" aria-label="Generar QR de prueba EO Consultores" role="button">🧪 Generar QR de prueba (EO Consultores)</button>';
