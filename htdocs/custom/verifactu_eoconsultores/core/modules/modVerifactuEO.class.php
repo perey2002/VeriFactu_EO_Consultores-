@@ -85,12 +85,14 @@ class modVerifactuEO extends DolibarrModules
         $r = 0;
         $this->rights[$r][0] = 1075001;
         $this->rights[$r][1] = 'Administrar la configuración de VeriFactu EO Consultores';
+        $this->rights[$r][2] = 'w';
         $this->rights[$r][3] = 1;
         $this->rights[$r][4] = 'setup';
         $r++;
 
         $this->rights[$r][0] = 1075002;
         $this->rights[$r][1] = 'Exportar registros VeriFactu';
+        $this->rights[$r][2] = 'r';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'export';
         $r++;
@@ -106,7 +108,7 @@ class modVerifactuEO extends DolibarrModules
             'langs' => 'verifactu_eoconsultores@verifactu_eoconsultores',
             'position' => 100,
             'enabled' => '$conf->verifactu_eoconsultores->enabled',
-            'perms' => '$user->rights->verifactu_eoconsultores->setup',
+            'perms' => '$user->admin || $user->rights->verifactu_eoconsultores->setup',
             'target' => '',
             'user' => 2
         );

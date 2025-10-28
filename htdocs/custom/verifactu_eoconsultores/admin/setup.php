@@ -94,7 +94,8 @@ $backtopage = $_SERVER['PHP_SELF'];
 
 if (in_array($action, array('save', 'testqr'), true) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifactu_check_token()) {
-        accessforbidden();
+        setEventMessages($langs->trans('ErrorBadToken'), null, 'errors');
+        $action = '';
     }
 }
 
