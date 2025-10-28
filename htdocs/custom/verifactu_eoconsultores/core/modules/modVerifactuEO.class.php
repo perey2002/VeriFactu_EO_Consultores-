@@ -97,7 +97,7 @@ class modVerifactuEO extends DolibarrModules
 
         $this->menu = array();
         $this->menu[] = array(
-            'fk_menu' => 'fk_mainmenu=accountancy,billing',
+            'fk_menu' => 'fk_mainmenu=billing',
             'type' => 'left',
             'titre' => 'VeriFactu EO Consultores',
             'mainmenu' => 'billing',
